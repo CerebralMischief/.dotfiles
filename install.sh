@@ -2,24 +2,41 @@
 ########################################################################
 # install.sh
 # This script creates symlinks from the home directory to any desired 
-# dotfiles in ~/dotfiles
+# dotfiles in ~/.dotfiles
 ########################################################################
 
 # Before doing anything, check to determine if run as root/sudo.
 #if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root/sudo." ; exit 1 ; fi
 
-# Script Variables
+##[ Script Variables ]#########################################################
 dir=~/.dotfiles                      # Dotfiles directory
 backupdir=~/.dotfiles_backup         # Old dotfiles backup directory
 packageManagerInstall=sudo pacman -S # Distro specific package manager.
 
-# Messages
+##[ Messages ]#################################################################
 completed="Complete."                
-installed="Already installed, skipping."
-newWPrompt=" wasn't installed.  Would you like to go through the default configuration steps?"
+installed="✓ Already installed, skipping."
 new=" wasn't installed."
+directoryExists="Directory already exists, skipping creation."
+
+# File System Messages
+changeDir="Changing to the $dir directory..."
+moveingDotFiles="Moving any existing dotfiles from ~ to $backupdir"
+createSimlink="Creating symlink to $file in the home directory."
+
+##[ Prompts ]##################################################################
+newPrompt=" wasn't installed.  Would you like to go through the default
+configuration steps?"
+
+
+##[ Apps ]#####################################################################
+git="git"
+vim="vim"
+zsh="oh-my-zsh"
+
 # List of files/folders to synlink in the ~ directory.
-files="aliases bashrc exports fonts functions gitconfig path psqlrc vimrc vim zshrc zpreztorc"    
+files="aliases bashrc exports fonts functions gitconfig path psqlrc vimrc vim
+zshrc zpreztorc"    
 
 # Create the back up directory (name is controlled by the olddir variable).
 echo -n "Creating $backupdir to  backup of any existing dotfiles in ~..."
@@ -27,37 +44,50 @@ mkdir -p $backupdir
 echo $completed
 
 # Change to the dotfiles directory
-echo -n "Changing to the $dir directory..."
+echo -n $changeDir 
 cd $dir
 echo $completed
 
-# Script functions.
+##[ Script Functions ]#########################################################
 setup_aliases () {
-    # Move any existing dotfiles in homedir to dotfiles_backup directory, then create symlinks 
-    # from the homedir to any files in the ~/.dotfiles directory specified in $files
+    # Move any existing dotfiles in homedir to dotfiles_backup directory, then
+    # create symlinks from the homedir to any files in the ~/.dotfiles 
+    # directory specified in $files
     for file in $files; do
-        echo "Moving any existing dotfiles from ~ to $backupdir"
+        echo $moveingDotFiles
         mv ~/.$file ~/$backupdir
-        echo "Creating symlink to $file in home directory."
+        echo $createSimlink
         ln -s $dir/$file ~/.$file
     done
 }
 
 install_vim () {
     if which vim >/dev/null; then
-        echo "Vim " + $installed
+        echo $vim $installed
     else
         $packageManagerInstall vim
     fi
 }
 
+setup_directories () {
+    # Create the directories useful for various scripts and tools if they
+    # don't exist.
+    echo Setting up directories...
+    if [ ! -d $dir/bin ]; then
+	    echo Not found, creating..
+	    mkdir -p $dir/.bin
+    else
+      echo $directoryExists
+    fi 
+}
+
 install_git () {
     if which git >/dev/null; then
-        echo "git" $installed
+        echo $git $installed
     else
         $packageManagerInstall git
         echo
-        read -p "Git " + $new "Seems like it's your first git install, would you like yo setup basic config? " -n 1 -r
+        read -p $git $new "Would you like to setup basic config? " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo -n "Please enter your git username: "
@@ -70,7 +100,9 @@ install_git () {
             git config --global user.email $git_useremail
 
             echo
-            echo "Your git config has been setup in ~/.gitconfig"
+            echo "Your git config has been setup in ~/.gitconfig with the following settings:"
+	    echo "git username:" $git_username 
+	    echo "git email:" $git_useremail 
         fi
     fi
 
@@ -127,6 +159,8 @@ install_vundle () {
     fi
     vim +PluginInstall +qall
 }
+
+setup_directories 
 
 install_git
 
