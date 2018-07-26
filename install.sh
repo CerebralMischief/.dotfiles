@@ -11,10 +11,11 @@
 ##[ Script Variables ]#########################################################
 dir=~/.dotfiles                      # Dotfiles directory
 backupdir=~/.dotfiles_backup         # Old dotfiles backup directory
+binDir=~/bin                         # Bin folder for scripts and tools.
 packageManagerInstall=sudo pacman -S # Distro specific package manager.
 
 ##[ Messages ]#################################################################
-completed="Complete."                
+completed="Operation complete."                
 installed="✓ Already installed, skipping."
 new=" wasn't installed."
 directoryExists="Directory already exists, skipping creation."
@@ -27,7 +28,8 @@ createSimlink="Creating symlink to $file in the home directory."
 ##[ Prompts ]##################################################################
 newPrompt=" wasn't installed.  Would you like to go through the default
 configuration steps?"
-
+gitUserNamePrompt="Please enter your git user name:"
+gitUserEmailPrompt="Please enter your git email:"
 
 ##[ Apps ]#####################################################################
 git="git"
@@ -72,10 +74,8 @@ install_vim () {
 setup_directories () {
     # Create the directories useful for various scripts and tools if they
     # don't exist.
-    echo Setting up directories...
-    if [ ! -d $dir/bin ]; then
-	    echo Not found, creating..
-	    mkdir -p $dir/.bin
+    if [ ! -d $dir/$binDir ]; then
+	    mkdir -p $dir/$binDir
     else
       echo $directoryExists
     fi 
@@ -90,12 +90,12 @@ install_git () {
         read -p $git $new "Would you like to setup basic config? " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            echo -n "Please enter your git username: "
+            echo -n $gitUserNamePrompt
             read git_username
             git config --global user.name $git_username
 
             echo
-            echo -n "Please enter your git email address: "
+            echo -n $gitUserEmailPrompt  
             read git_useremail
             git config --global user.email $git_useremail
 
