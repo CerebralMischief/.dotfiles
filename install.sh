@@ -64,6 +64,20 @@ cd $dir
 echo $completed
 
 ##[ Script Functions ]#########################################################
+get_package_manager() {
+    # This function sets the package manager up for further calls.
+    if [ -f /etc/apt/sources.list ]; then
+           packageManager="apt-get -y install"
+        elif [ -f /etc/yum.conf ]; then
+           packageManager="yum -y install"
+        elif [ -f /etc/pacman.conf ]; then
+           packageManager="pacman -S --noconfirm"
+        else
+           echo "Your distribution is not supported by this script."
+           exit
+        fi
+}
+
 setup_aliases () {
     # Move any existing dotfiles in homedir to dotfiles_backup directory, then
     # create symlinks from the homedir to any files in the ~/.dotfiles 
@@ -98,7 +112,7 @@ install_git () {
     if which git >/dev/null; then
         echo $git $installed
     else
-        $packageManagerInstall git
+        $packageManagerInstall $git
         echo
         read -p $git $new "Would you like to setup basic config? " -n 1 -r
         echo
@@ -173,27 +187,31 @@ install_vundle () {
     vim +PluginInstall +qall
 }
 
-setup_directories 
+get_package_manager
 
-install_git
+echo $packageManager
+
+#setup_directories 
+
+#install_git
 
 #install_vim
 
 #install_zsh
 
-install_vundle
+#install_vundle
 
-read -p "Do you want to setup aliases? " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    setup_aliases
-fi
+#read -p "Do you want to setup aliases? " -n 1 -r
+#echo
+#if [[ $REPLY =~ ^[Yy]$ ]]; then
+#    setup_aliases
+#fi
 
-if [[ ! -d $dir/vim/backup ]]; then
-    mkdir $dir/vim/backup
-fi
-
-if [[ ! -d $dir/vim/swap ]]; then
-    mkdir $dir/vim/swap
-fi
+#if [[ ! -d $dir/vim/backup ]]; then
+#    mkdir $dir/vim/backup
+#fi
+#
+#if [[ ! -d $dir/vim/swap ]]; then
+#    mkdir $dir/vim/swap
+#fi
 
