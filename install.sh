@@ -35,7 +35,7 @@ directoryExists="Directory already exists, skipping creation."
 
 # File System Messages
 changeDir="Changing to the $dir directory..."
-moveingDotFiles="Moving any existing dotfiles from ~ to $backupdir"
+moveingDotFiles="Moving any existing dotfiles from ~/ to $backupdir"
 createSimlink="Creating symlink to $file in the home directory."
 
 ##[ Prompts ]##################################################################
@@ -49,14 +49,12 @@ git="git"
 vim="vim"
 zsh="oh-my-zsh"
 
+##[ Files ]####################################################################
 # List of files/folders to synlink in the ~ directory.
 files="aliases bashrc exports fonts functions gitconfig path psqlrc vimrc vim
 zshrc zpreztorc"    
 
-# Create the back up directory (name is controlled by the olddir variable).
-echo -n "Creating $backupdir to  backup of any existing dotfiles in ~..."
-mkdir -p $backupdir
-echo $completed
+# Step 1: Create back up directory
 
 # Change to the dotfiles directory
 echo -n $changeDir 
@@ -64,18 +62,34 @@ cd $dir
 echo $completed
 
 ##[ Script Functions ]#########################################################
-get_package_manager() {
-    # This function sets the package manager up for further calls.
+verify_os() {
+    # This function is designed to ensure that the install.sh script is running
+    # on a distribution that is supported.
     if [ -f /etc/apt/sources.list ]; then
-           packageManager="apt-get -y install"
-        elif [ -f /etc/yum.conf ]; then
-           packageManager="yum -y install"
-        elif [ -f /etc/pacman.conf ]; then
-           packageManager="pacman -S --noconfirm"
-        else
-           echo "Your distribution is not supported by this script."
-           exit
-        fi
+       apt-get upgrade
+       apt-get update
+       apt-get dist-update
+       apt-get autoclean
+       # Now set the package manager variable.
+       $packaeManagerInstall=apt-get -y install
+    elif [-f /etc/yum.conf ]; then
+       $packageManagerInstall=yum -y install
+    elif [-f /etc/pacman.conf ]; then
+       # We don't need to do set the variable as it defaults to arch.
+       pacman -Syu
+       pacman -S --noconfirm pacman
+    else
+       echo "Your distribution is not supported by this script."
+       exit
+    fi
+}
+
+create_directories() {
+    # This function is designed to create the directories needed to backup
+    # files prior to installing the dotfiles.
+    echo -n "Creating $backupdir to backup existing dotfiles in ~..."
+    mkdir -p $backupdir
+    echo $completed
 }
 
 setup_aliases () {
@@ -112,7 +126,7 @@ install_git () {
     if which git >/dev/null; then
         echo $git $installed
     else
-        $packageManagerInstall $git
+        $packageManagerInstall git
         echo
         read -p $git $new "Would you like to setup basic config? " -n 1 -r
         echo
@@ -187,11 +201,7 @@ install_vundle () {
     vim +PluginInstall +qall
 }
 
-get_package_manager
-
-echo $packageManager
-
-#setup_directories 
+setup_directories 
 
 #install_git
 
@@ -199,19 +209,19 @@ echo $packageManager
 
 #install_zsh
 
-#install_vundle
+install_vundle
 
-#read -p "Do you want to setup aliases? " -n 1 -r
-#echo
-#if [[ $REPLY =~ ^[Yy]$ ]]; then
-#    setup_aliases
-#fi
+read -p "Do you want to setup aliases? " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    setup_aliases
+fi
 
-#if [[ ! -d $dir/vim/backup ]]; then
-#    mkdir $dir/vim/backup
-#fi
-#
-#if [[ ! -d $dir/vim/swap ]]; then
-#    mkdir $dir/vim/swap
-#fi
+if [[ ! -d $dir/vim/backup ]]; then
+    mkdir $dir/vim/backup
+fi
+
+if [[ ! -d $dir/vim/swap ]]; then
+    mkdir $dir/vim/swap
+fi
 
