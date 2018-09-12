@@ -4,6 +4,8 @@
     | (_| | (_) | |_|  _| | |  __/\__ \
      \__,_|\___/ \__|_| |_|_|\___||___/
 
+## Important Note
+This is a work in progress!  Don't clone this and exepct to be able to execute the install.sh file with any positive result.
 
 My personal dotfiles collection.  Use with caution as these may break your configuration. **NOTE**: Of course merely cloning this repository won't cause any issues unless you clone it directly to your home folder.
 
