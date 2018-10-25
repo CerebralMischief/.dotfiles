@@ -1,0 +1,13 @@
+host codejockey
+  hostname codejockey.net
+  port 22
+  user cerebral
+  identityfile ~/.ssh/id_ed25519_codejockey
+  AddKeysToAgent yes
+
+host kali
+  hostname 192.168.1.17
+  port 22
+  user root
+  identityfile ~/.ssh/id_ed25519_annapolis
+  AddKeysToAgent yes
