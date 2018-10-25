@@ -14,26 +14,24 @@
 # |_|_| |_|___/\__\__,_|_|_|\__,_|\__|_|\___/|_| |_| |___/\___|_|  |_| .__/ \__|
 #                                                                    |_|
 ##[ install.sh ]################################################################
-# This script creates symlinks from the home directory to any desired 
+# This script creates symlinks from the home directory to any desired
 # dotfiles in ~/.dotfiles
 ################################################################################
-
 # Before doing anything, check to determine if run as root/sudo.
 #if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root/sudo." ; exit 1 ; fi
-
 ##[ Script Variables ]#########################################################
-dir=~/.dotfiles                      # Dotfiles directory
-backupdir=~/.dotfiles_backup         # Old dotfiles backup directory
+dir=~/.dotfiles                       # Dotfiles directory
+backupdir=~/.dotfiles_backup          # Old dotfiles backup directory
 binDir=~/bin                         # Bin folder for scripts and tools.
 packageManagerInstall=sudo pacman -S # Distro specific package manager.
 
 ##[ Messages ]#################################################################
-completed="Operation complete."                
+completed="Operation complete."
 installed="✓ Already installed, skipping."
 new=" wasn't installed."
 directoryExists="Directory already exists, skipping creation."
 
-# File System Messages
+##[ File System Messages ]#####################################################
 changeDir="Changing to the $dir directory..."
 moveingDotFiles="Moving any existing dotfiles from ~/ to $backupdir"
 createSimlink="Creating symlink to $file in the home directory."
@@ -52,12 +50,12 @@ zsh="oh-my-zsh"
 ##[ Files ]####################################################################
 # List of files/folders to synlink in the ~ directory.
 files="aliases bashrc exports fonts functions gitconfig path psqlrc vimrc vim
-zshrc zpreztorc"    
+zshrc zpreztorc"
 
-# Step 1: Create back up directory
+##[ Step 1: Create back up directory ]#########################################
 
 # Change to the dotfiles directory
-echo -n $changeDir 
+echo -n $changeDir
 cd $dir
 echo $completed
 
@@ -65,6 +63,7 @@ echo $completed
 verify_os() {
     # This function is designed to ensure that the install.sh script is running
     # on a distribution that is supported.
+    echo 'in verify_os...'
     if [ -f /etc/apt/sources.list ]; then
        apt-get upgrade
        apt-get update
@@ -94,7 +93,7 @@ create_directories() {
 
 setup_aliases () {
     # Move any existing dotfiles in homedir to dotfiles_backup directory, then
-    # create symlinks from the homedir to any files in the ~/.dotfiles 
+    # create symlinks from the homedir to any files in the ~/.dotfiles
     # directory specified in $files
     for file in $files; do
         echo $moveingDotFiles
@@ -119,7 +118,7 @@ setup_directories () {
 	    mkdir -p $dir/$binDir
     else
       echo $directoryExists
-    fi 
+    fi
 }
 
 install_git () {
@@ -136,14 +135,14 @@ install_git () {
             git config --global user.name $git_username
 
             echo
-            echo -n $gitUserEmailPrompt  
+            echo -n $gitUserEmailPrompt
             read git_useremail
             git config --global user.email $git_useremail
 
             echo
             echo "Your git config has been setup in ~/.gitconfig with the following settings:"
-	    echo "git username:" $git_username 
-	    echo "git email:" $git_useremail 
+	    echo "git username:" $git_username
+	    echo "git email:" $git_useremail
         fi
     fi
 
@@ -201,15 +200,17 @@ install_vundle () {
     vim +PluginInstall +qall
 }
 
-setup_directories 
+verify_os
 
-#install_git
+setup_directories
 
-#install_vim
+install_git
 
-#install_zsh
+install_vim
 
 install_vundle
+
+#install_zsh
 
 read -p "Do you want to setup aliases? " -n 1 -r
 echo
@@ -224,4 +225,3 @@ fi
 if [[ ! -d $dir/vim/swap ]]; then
     mkdir $dir/vim/swap
 fi
-
